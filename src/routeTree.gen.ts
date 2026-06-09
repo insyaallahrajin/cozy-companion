@@ -12,11 +12,20 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedSistemSekolahRouteImport } from './routes/_authenticated/sistem/sekolah'
 import { Route as AuthenticatedSistemPenggunaRouteImport } from './routes/_authenticated/sistem/pengguna'
 import { Route as AuthenticatedSistemPengaturanRouteImport } from './routes/_authenticated/sistem/pengaturan'
 import { Route as AuthenticatedSistemAuditRouteImport } from './routes/_authenticated/sistem/audit'
+import { Route as AuthenticatedAkademikTahunAjaranRouteImport } from './routes/_authenticated/akademik/tahun-ajaran'
+import { Route as AuthenticatedAkademikSiswaRouteImport } from './routes/_authenticated/akademik/siswa'
+import { Route as AuthenticatedAkademikPresensiRouteImport } from './routes/_authenticated/akademik/presensi'
+import { Route as AuthenticatedAkademikNilaiRouteImport } from './routes/_authenticated/akademik/nilai'
+import { Route as AuthenticatedAkademikMataPelajaranRouteImport } from './routes/_authenticated/akademik/mata-pelajaran'
+import { Route as AuthenticatedAkademikKelasRouteImport } from './routes/_authenticated/akademik/kelas'
+import { Route as AuthenticatedAkademikJadwalRouteImport } from './routes/_authenticated/akademik/jadwal'
+import { Route as AuthenticatedAkademikGuruRouteImport } from './routes/_authenticated/akademik/guru'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -31,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -61,11 +75,68 @@ const AuthenticatedSistemAuditRoute =
     path: '/sistem/audit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAkademikTahunAjaranRoute =
+  AuthenticatedAkademikTahunAjaranRouteImport.update({
+    id: '/akademik/tahun-ajaran',
+    path: '/akademik/tahun-ajaran',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikSiswaRoute =
+  AuthenticatedAkademikSiswaRouteImport.update({
+    id: '/akademik/siswa',
+    path: '/akademik/siswa',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikPresensiRoute =
+  AuthenticatedAkademikPresensiRouteImport.update({
+    id: '/akademik/presensi',
+    path: '/akademik/presensi',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikNilaiRoute =
+  AuthenticatedAkademikNilaiRouteImport.update({
+    id: '/akademik/nilai',
+    path: '/akademik/nilai',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikMataPelajaranRoute =
+  AuthenticatedAkademikMataPelajaranRouteImport.update({
+    id: '/akademik/mata-pelajaran',
+    path: '/akademik/mata-pelajaran',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikKelasRoute =
+  AuthenticatedAkademikKelasRouteImport.update({
+    id: '/akademik/kelas',
+    path: '/akademik/kelas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikJadwalRoute =
+  AuthenticatedAkademikJadwalRouteImport.update({
+    id: '/akademik/jadwal',
+    path: '/akademik/jadwal',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikGuruRoute =
+  AuthenticatedAkademikGuruRouteImport.update({
+    id: '/akademik/guru',
+    path: '/akademik/guru',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
+  '/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
+  '/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
+  '/akademik/nilai': typeof AuthenticatedAkademikNilaiRoute
+  '/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
+  '/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
+  '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -75,6 +146,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/setup': typeof AuthenticatedSetupRoute
+  '/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
+  '/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
+  '/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
+  '/akademik/nilai': typeof AuthenticatedAkademikNilaiRoute
+  '/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
+  '/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
+  '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -86,6 +166,15 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/setup': typeof AuthenticatedSetupRoute
+  '/_authenticated/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/_authenticated/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
+  '/_authenticated/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
+  '/_authenticated/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
+  '/_authenticated/akademik/nilai': typeof AuthenticatedAkademikNilaiRoute
+  '/_authenticated/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
+  '/_authenticated/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
+  '/_authenticated/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/_authenticated/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/_authenticated/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/_authenticated/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -97,6 +186,15 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/setup'
+    | '/akademik/guru'
+    | '/akademik/jadwal'
+    | '/akademik/kelas'
+    | '/akademik/mata-pelajaran'
+    | '/akademik/nilai'
+    | '/akademik/presensi'
+    | '/akademik/siswa'
+    | '/akademik/tahun-ajaran'
     | '/sistem/audit'
     | '/sistem/pengaturan'
     | '/sistem/pengguna'
@@ -106,6 +204,15 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/setup'
+    | '/akademik/guru'
+    | '/akademik/jadwal'
+    | '/akademik/kelas'
+    | '/akademik/mata-pelajaran'
+    | '/akademik/nilai'
+    | '/akademik/presensi'
+    | '/akademik/siswa'
+    | '/akademik/tahun-ajaran'
     | '/sistem/audit'
     | '/sistem/pengaturan'
     | '/sistem/pengguna'
@@ -116,6 +223,15 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/setup'
+    | '/_authenticated/akademik/guru'
+    | '/_authenticated/akademik/jadwal'
+    | '/_authenticated/akademik/kelas'
+    | '/_authenticated/akademik/mata-pelajaran'
+    | '/_authenticated/akademik/nilai'
+    | '/_authenticated/akademik/presensi'
+    | '/_authenticated/akademik/siswa'
+    | '/_authenticated/akademik/tahun-ajaran'
     | '/_authenticated/sistem/audit'
     | '/_authenticated/sistem/pengaturan'
     | '/_authenticated/sistem/pengguna'
@@ -150,6 +266,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/setup': {
+      id: '/_authenticated/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedSetupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -186,11 +309,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSistemAuditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/akademik/tahun-ajaran': {
+      id: '/_authenticated/akademik/tahun-ajaran'
+      path: '/akademik/tahun-ajaran'
+      fullPath: '/akademik/tahun-ajaran'
+      preLoaderRoute: typeof AuthenticatedAkademikTahunAjaranRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/siswa': {
+      id: '/_authenticated/akademik/siswa'
+      path: '/akademik/siswa'
+      fullPath: '/akademik/siswa'
+      preLoaderRoute: typeof AuthenticatedAkademikSiswaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/presensi': {
+      id: '/_authenticated/akademik/presensi'
+      path: '/akademik/presensi'
+      fullPath: '/akademik/presensi'
+      preLoaderRoute: typeof AuthenticatedAkademikPresensiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/nilai': {
+      id: '/_authenticated/akademik/nilai'
+      path: '/akademik/nilai'
+      fullPath: '/akademik/nilai'
+      preLoaderRoute: typeof AuthenticatedAkademikNilaiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/mata-pelajaran': {
+      id: '/_authenticated/akademik/mata-pelajaran'
+      path: '/akademik/mata-pelajaran'
+      fullPath: '/akademik/mata-pelajaran'
+      preLoaderRoute: typeof AuthenticatedAkademikMataPelajaranRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/kelas': {
+      id: '/_authenticated/akademik/kelas'
+      path: '/akademik/kelas'
+      fullPath: '/akademik/kelas'
+      preLoaderRoute: typeof AuthenticatedAkademikKelasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/jadwal': {
+      id: '/_authenticated/akademik/jadwal'
+      path: '/akademik/jadwal'
+      fullPath: '/akademik/jadwal'
+      preLoaderRoute: typeof AuthenticatedAkademikJadwalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/guru': {
+      id: '/_authenticated/akademik/guru'
+      path: '/akademik/guru'
+      fullPath: '/akademik/guru'
+      preLoaderRoute: typeof AuthenticatedAkademikGuruRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
+  AuthenticatedAkademikGuruRoute: typeof AuthenticatedAkademikGuruRoute
+  AuthenticatedAkademikJadwalRoute: typeof AuthenticatedAkademikJadwalRoute
+  AuthenticatedAkademikKelasRoute: typeof AuthenticatedAkademikKelasRoute
+  AuthenticatedAkademikMataPelajaranRoute: typeof AuthenticatedAkademikMataPelajaranRoute
+  AuthenticatedAkademikNilaiRoute: typeof AuthenticatedAkademikNilaiRoute
+  AuthenticatedAkademikPresensiRoute: typeof AuthenticatedAkademikPresensiRoute
+  AuthenticatedAkademikSiswaRoute: typeof AuthenticatedAkademikSiswaRoute
+  AuthenticatedAkademikTahunAjaranRoute: typeof AuthenticatedAkademikTahunAjaranRoute
   AuthenticatedSistemAuditRoute: typeof AuthenticatedSistemAuditRoute
   AuthenticatedSistemPengaturanRoute: typeof AuthenticatedSistemPengaturanRoute
   AuthenticatedSistemPenggunaRoute: typeof AuthenticatedSistemPenggunaRoute
@@ -199,6 +387,16 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedSetupRoute: AuthenticatedSetupRoute,
+  AuthenticatedAkademikGuruRoute: AuthenticatedAkademikGuruRoute,
+  AuthenticatedAkademikJadwalRoute: AuthenticatedAkademikJadwalRoute,
+  AuthenticatedAkademikKelasRoute: AuthenticatedAkademikKelasRoute,
+  AuthenticatedAkademikMataPelajaranRoute:
+    AuthenticatedAkademikMataPelajaranRoute,
+  AuthenticatedAkademikNilaiRoute: AuthenticatedAkademikNilaiRoute,
+  AuthenticatedAkademikPresensiRoute: AuthenticatedAkademikPresensiRoute,
+  AuthenticatedAkademikSiswaRoute: AuthenticatedAkademikSiswaRoute,
+  AuthenticatedAkademikTahunAjaranRoute: AuthenticatedAkademikTahunAjaranRoute,
   AuthenticatedSistemAuditRoute: AuthenticatedSistemAuditRoute,
   AuthenticatedSistemPengaturanRoute: AuthenticatedSistemPengaturanRoute,
   AuthenticatedSistemPenggunaRoute: AuthenticatedSistemPenggunaRoute,
