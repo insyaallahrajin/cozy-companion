@@ -1,29 +1,35 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "SIMAT — Sistem Informasi Manajemen At-Tauhid" },
+      {
+        name: "description",
+        content:
+          "Platform ERP & manajemen sekolah terpadu Yayasan At-Tauhid: akademik, keuangan, akuntansi, PPDB, dan pelaporan.",
+      },
     ],
   }),
-  component: Index,
+  component: IndexRedirect,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function IndexRedirect() {
+  const [target, setTarget] = useState<"/dashboard" | "/auth" | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setTarget(data.session ? "/dashboard" : "/auth");
+    });
+  }, []);
+  if (!target) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background">
+        <div className="text-muted-foreground text-sm">Memuat SIMAT…</div>
+      </div>
+    );
+  }
+  return <Navigate to={target} replace />;
 }
