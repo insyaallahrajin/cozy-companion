@@ -269,3 +269,44 @@ function ManageUserDialog({ user }: { user: UserRow }) {
     </Dialog>
   );
 }
+
+import { ROLE_PRESETS } from "@/lib/role-presets";
+import { Sparkles } from "lucide-react";
+
+function PresetRow({ userId, existingRoles, onDone }: { userId: string; existingRoles: AppRole[]; onDone: () => void }) {
+  const assign = useServerFn(assignRole);
+  const apply = useMutation({
+    mutationFn: async (presetId: string) => {
+      const preset = ROLE_PRESETS.find((p) => p.id === presetId);
+      if (!preset) throw new Error("Preset tidak ditemukan");
+      for (const role of preset.roles) {
+        if (existingRoles.includes(role)) continue;
+        await assign({ data: { user_id: userId, role } });
+      }
+      return preset;
+    },
+    onSuccess: (p) => { toast.success(`Preset "${p.label}" diterapkan`); onDone(); },
+    onError: (e: Error) => toast.error("Gagal", { description: e.message }),
+  });
+  return (
+    <div className="rounded-md border bg-muted/30 p-3">
+      <Label className="flex items-center gap-1.5 mb-2 text-xs"><Sparkles className="h-3.5 w-3.5" /> Preset peran cepat</Label>
+      <div className="flex flex-wrap gap-1.5">
+        {ROLE_PRESETS.map((p) => (
+          <Button
+            key={p.id} size="sm" variant="outline" type="button"
+            onClick={() => apply.mutate(p.id)}
+            disabled={apply.isPending}
+            title={p.description}
+          >
+            {p.label}
+          </Button>
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-2">
+        Klik preset untuk menambahkan peran-peran terkait sekaligus. Atur akses sekolah di bawah.
+      </p>
+    </div>
+  );
+}
+
