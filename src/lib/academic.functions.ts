@@ -578,3 +578,163 @@ export const deleteGrade = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============== BULK IMPORT: CLASSES ==============
+const classRow = z.object({
+  grade_level: z.number().int().min(1).max(13),
+  name: z.string().min(1).max(64),
+  capacity: z.number().int().min(1).max(100).default(32),
+  room: z.string().max(64).nullable().optional(),
+  homeroom_teacher_name: z.string().max(255).nullable().optional(),
+});
+
+export const bulkImportClasses = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      school_id: uuid,
+      academic_year_id: uuid,
+      rows: z.array(classRow).min(1).max(500),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: staff } = await context.supabase
+      .from("staff").select("id, full_name").eq("school_id", data.school_id);
+    const teacherByName = new Map<string, string>();
+    (staff ?? []).forEach((s: any) => teacherByName.set(s.full_name.toLowerCase().trim(), s.id));
+
+    const payload = data.rows.map((r) => ({
+      school_id: data.school_id,
+      academic_year_id: data.academic_year_id,
+      grade_level: r.grade_level,
+      name: r.name,
+      capacity: r.capacity ?? 32,
+      room: r.room ?? null,
+      homeroom_teacher_id: r.homeroom_teacher_name
+        ? teacherByName.get(r.homeroom_teacher_name.toLowerCase().trim()) ?? null
+        : null,
+      status: "ACTIVE" as const,
+    }));
+    const { error, count } = await context.supabase
+      .from("classes").insert(payload, { count: "exact" });
+    if (error) throw new Error(error.message);
+    return { ok: true, inserted: count ?? payload.length };
+  });
+
+// ============== BULK IMPORT: STUDENTS ==============
+const studentRow = z.object({
+  nisn: z.string().max(32).nullable().optional(),
+  nis: z.string().max(32).nullable().optional(),
+  full_name: z.string().min(1).max(255),
+  gender: gender,
+  birth_place: z.string().max(120).nullable().optional(),
+  birth_date: z.string().nullable().optional(),
+  religion: religion.default("ISLAM"),
+  phone: z.string().max(32).nullable().optional(),
+  address: z.string().max(500).nullable().optional(),
+  class_name: z.string().max(64).nullable().optional(),
+  parent_name: z.string().max(255).nullable().optional(),
+  parent_relation: relation.nullable().optional(),
+  parent_phone: z.string().max(32).nullable().optional(),
+});
+
+export const bulkImportStudents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      school_id: uuid,
+      foundation_id: uuid,
+      academic_year_id: uuid.nullable().optional(),
+      rows: z.array(studentRow).min(1).max(1000),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const classByName = new Map<string, string>();
+    if (data.academic_year_id) {
+      const { data: cls } = await context.supabase
+        .from("classes").select("id, name")
+        .eq("school_id", data.school_id)
+        .eq("academic_year_id", data.academic_year_id);
+      (cls ?? []).forEach((c: any) => classByName.set(c.name.toLowerCase().trim(), c.id));
+    }
+    let inserted = 0;
+    const errors: { row: number; message: string }[] = [];
+    for (let i = 0; i < data.rows.length; i++) {
+      const r = data.rows[i];
+      try {
+        const { data: ins, error } = await context.supabase
+          .from("students").insert({
+            foundation_id: data.foundation_id,
+            school_id: data.school_id,
+            nisn: r.nisn || null, nis: r.nis || null,
+            full_name: r.full_name, gender: r.gender,
+            birth_place: r.birth_place || null, birth_date: r.birth_date || null,
+            religion: r.religion,
+            phone: r.phone || null, address: r.address || null,
+            status: "AKTIF" as const,
+          }).select("id").single();
+        if (error) throw new Error(error.message);
+        if (r.class_name && data.academic_year_id) {
+          const classId = classByName.get(r.class_name.toLowerCase().trim());
+          if (classId) {
+            await context.supabase.from("student_enrollments").insert({
+              student_id: ins.id, class_id: classId,
+              academic_year_id: data.academic_year_id, status: "AKTIF",
+            });
+          }
+        }
+        if (r.parent_name) {
+          await context.supabase.from("student_parents").insert({
+            student_id: ins.id,
+            relation: r.parent_relation ?? "WALI",
+            full_name: r.parent_name, phone: r.parent_phone || null,
+            is_primary: true,
+          });
+        }
+        inserted++;
+      } catch (e: any) {
+        errors.push({ row: i + 1, message: e.message ?? String(e) });
+      }
+    }
+    return { ok: true, inserted, errors };
+  });
+
+// ============== GRADE REPORT (per class + year) ==============
+export const getGradeReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ class_id: uuid, academic_year_id: uuid }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: klass, error: ek } = await context.supabase
+      .from("classes")
+      .select("id, name, grade_level, room, school_id, academic_year_id, staff:homeroom_teacher_id(full_name), academic_years(name), schools(name)")
+      .eq("id", data.class_id).single();
+    if (ek) throw new Error(ek.message);
+    const { data: terms } = await context.supabase
+      .from("academic_terms").select("id, name, ordinal")
+      .eq("academic_year_id", data.academic_year_id).order("ordinal");
+    const { data: cs } = await context.supabase
+      .from("class_subjects")
+      .select("id, subjects(id, code, name, kkm), staff:teacher_id(full_name)")
+      .eq("class_id", data.class_id);
+    const { data: enr } = await context.supabase
+      .from("student_enrollments")
+      .select("roll_number, students(id, full_name, nisn, nis)")
+      .eq("class_id", data.class_id)
+      .eq("academic_year_id", data.academic_year_id)
+      .eq("status", "AKTIF");
+    const csIds = (cs ?? []).map((x: any) => x.id);
+    const gradesRes = csIds.length
+      ? await context.supabase.from("grades")
+          .select("class_subject_id, student_id, term_id, score, weight")
+          .in("class_subject_id", csIds)
+      : { data: [] as any[] };
+    return {
+      klass, terms: terms ?? [], class_subjects: cs ?? [],
+      students: (enr ?? []).map((e: any) => ({ ...e.students, roll_number: e.roll_number }))
+        .filter(Boolean)
+        .sort((a: any, b: any) => (a.roll_number ?? 999) - (b.roll_number ?? 999) || a.full_name.localeCompare(b.full_name)),
+      grades: gradesRes.data ?? [],
+    };
+  });
