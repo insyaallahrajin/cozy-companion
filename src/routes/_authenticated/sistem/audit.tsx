@@ -74,7 +74,7 @@ function AuditPage() {
                       <TableCell><Badge variant="outline">{r.action as string}</Badge></TableCell>
                       <TableCell>
                         <div className="text-sm">{r.entity as string}</div>
-                        {r.entity_id && <div className="text-xs text-muted-foreground font-mono truncate max-w-[200px]">{r.entity_id as string}</div>}
+                        {!!r.entity_id && <div className="text-xs text-muted-foreground font-mono truncate max-w-[200px]">{r.entity_id as string}</div>}
                       </TableCell>
                       <TableCell className="text-xs font-mono text-muted-foreground truncate max-w-[140px]">
                         {(r.actor_id as string) ?? "—"}
