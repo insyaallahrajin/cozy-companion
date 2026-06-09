@@ -13,6 +13,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedSistemSekolahRouteImport } from './routes/_authenticated/sistem/sekolah'
+import { Route as AuthenticatedSistemPenggunaRouteImport } from './routes/_authenticated/sistem/pengguna'
+import { Route as AuthenticatedSistemPengaturanRouteImport } from './routes/_authenticated/sistem/pengaturan'
+import { Route as AuthenticatedSistemAuditRouteImport } from './routes/_authenticated/sistem/audit'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -33,16 +37,48 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSistemSekolahRoute =
+  AuthenticatedSistemSekolahRouteImport.update({
+    id: '/sistem/sekolah',
+    path: '/sistem/sekolah',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSistemPenggunaRoute =
+  AuthenticatedSistemPenggunaRouteImport.update({
+    id: '/sistem/pengguna',
+    path: '/sistem/pengguna',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSistemPengaturanRoute =
+  AuthenticatedSistemPengaturanRouteImport.update({
+    id: '/sistem/pengaturan',
+    path: '/sistem/pengaturan',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSistemAuditRoute =
+  AuthenticatedSistemAuditRouteImport.update({
+    id: '/sistem/audit',
+    path: '/sistem/audit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/sistem/audit': typeof AuthenticatedSistemAuditRoute
+  '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
+  '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
+  '/sistem/sekolah': typeof AuthenticatedSistemSekolahRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/sistem/audit': typeof AuthenticatedSistemAuditRoute
+  '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
+  '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
+  '/sistem/sekolah': typeof AuthenticatedSistemSekolahRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,18 +86,40 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/sistem/audit': typeof AuthenticatedSistemAuditRoute
+  '/_authenticated/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
+  '/_authenticated/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
+  '/_authenticated/sistem/sekolah': typeof AuthenticatedSistemSekolahRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/sistem/audit'
+    | '/sistem/pengaturan'
+    | '/sistem/pengguna'
+    | '/sistem/sekolah'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/sistem/audit'
+    | '/sistem/pengaturan'
+    | '/sistem/pengguna'
+    | '/sistem/sekolah'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/sistem/audit'
+    | '/_authenticated/sistem/pengaturan'
+    | '/_authenticated/sistem/pengguna'
+    | '/_authenticated/sistem/sekolah'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,15 +158,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sistem/sekolah': {
+      id: '/_authenticated/sistem/sekolah'
+      path: '/sistem/sekolah'
+      fullPath: '/sistem/sekolah'
+      preLoaderRoute: typeof AuthenticatedSistemSekolahRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sistem/pengguna': {
+      id: '/_authenticated/sistem/pengguna'
+      path: '/sistem/pengguna'
+      fullPath: '/sistem/pengguna'
+      preLoaderRoute: typeof AuthenticatedSistemPenggunaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sistem/pengaturan': {
+      id: '/_authenticated/sistem/pengaturan'
+      path: '/sistem/pengaturan'
+      fullPath: '/sistem/pengaturan'
+      preLoaderRoute: typeof AuthenticatedSistemPengaturanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sistem/audit': {
+      id: '/_authenticated/sistem/audit'
+      path: '/sistem/audit'
+      fullPath: '/sistem/audit'
+      preLoaderRoute: typeof AuthenticatedSistemAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedSistemAuditRoute: typeof AuthenticatedSistemAuditRoute
+  AuthenticatedSistemPengaturanRoute: typeof AuthenticatedSistemPengaturanRoute
+  AuthenticatedSistemPenggunaRoute: typeof AuthenticatedSistemPenggunaRoute
+  AuthenticatedSistemSekolahRoute: typeof AuthenticatedSistemSekolahRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedSistemAuditRoute: AuthenticatedSistemAuditRoute,
+  AuthenticatedSistemPengaturanRoute: AuthenticatedSistemPengaturanRoute,
+  AuthenticatedSistemPenggunaRoute: AuthenticatedSistemPenggunaRoute,
+  AuthenticatedSistemSekolahRoute: AuthenticatedSistemSekolahRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
