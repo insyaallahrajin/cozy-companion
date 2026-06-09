@@ -248,5 +248,9 @@ export const listAuditLogs = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .range(data.offset, data.offset + data.limit - 1);
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [], total: count ?? 0 };
+    const serialized = (rows ?? []).map((r) => ({
+      ...r,
+      ip_address: r.ip_address == null ? null : String(r.ip_address),
+    }));
+    return { rows: serialized, total: count ?? 0 };
   });
