@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listPayments, recordPayment, listCashAccounts, listInvoices } from "@/lib/finance.functions";
@@ -12,9 +12,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/format";
+import { downloadCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/_authenticated/keuangan/pembayaran")({
   head: () => ({ meta: [{ title: "Pembayaran — SIMAT" }] }),
@@ -22,11 +23,35 @@ export const Route = createFileRoute("/_authenticated/keuangan/pembayaran")({
 });
 
 function Page({ schoolId }: { schoolId: string }) {
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+  const [from, setFrom] = useState(monthStart);
+  const [to, setTo] = useState(today.toISOString().slice(0, 10));
   const fetch = useServerFn(listPayments);
-  const q = useQuery({ queryKey: ["payments", schoolId], queryFn: () => fetch({ data: { school_id: schoolId } }) });
+  const q = useQuery({
+    queryKey: ["payments", schoolId, from, to],
+    queryFn: () => fetch({ data: { school_id: schoolId, from, to } }),
+  });
+  const rows = q.data ?? [];
+  const exportCsv = () => {
+    if (!rows.length) { toast.info("Tidak ada data untuk diekspor."); return; }
+    downloadCsv(`pembayaran_${from}_${to}.csv`, rows as any[], [
+      { header: "No. Pembayaran", value: (r) => r.payment_no },
+      { header: "Tanggal", value: (r) => r.paid_at },
+      { header: "No. Tagihan", value: (r) => r.invoices?.invoice_no ?? "" },
+      { header: "Periode", value: (r) => r.invoices?.period_label ?? "" },
+      { header: "Siswa", value: (r) => r.students?.full_name ?? "" },
+      { header: "Akun Kas/Bank", value: (r) => r.cash_accounts?.name ?? "" },
+      { header: "Metode", value: (r) => r.method },
+      { header: "Referensi", value: (r) => r.reference ?? "" },
+      { header: "Nominal", value: (r) => Number(r.amount) },
+    ]);
+  };
+  const total = useMemo(() => rows.reduce((s: number, p: any) => s + Number(p.amount), 0), [rows]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pembayaran</h1>
           <p className="text-muted-foreground">Catat pembayaran tagihan SPP dan penerimaan lain.</p>
@@ -34,7 +59,18 @@ function Page({ schoolId }: { schoolId: string }) {
         <NewPaymentDialog schoolId={schoolId} />
       </div>
       <Card>
-        <CardHeader><CardTitle>Riwayat Pembayaran</CardTitle></CardHeader>
+        <CardHeader>
+          <div className="flex flex-wrap items-end gap-2 justify-between">
+            <div className="flex flex-wrap items-end gap-2">
+              <div><Label className="text-xs">Dari</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-40" /></div>
+              <div><Label className="text-xs">Sampai</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" /></div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Total: <span className="font-semibold text-foreground">{formatRupiah(total)}</span></span>
+              <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2" />Ekspor CSV</Button>
+            </div>
+          </div>
+        </CardHeader>
         <CardContent>
           {q.isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
             <Table>
@@ -45,8 +81,8 @@ function Page({ schoolId }: { schoolId: string }) {
                 <TableHead className="text-right">Nominal</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {(q.data ?? []).length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Belum ada pembayaran.</TableCell></TableRow>}
-                {(q.data ?? []).map((p: any) => (
+                {rows.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Belum ada pembayaran.</TableCell></TableRow>}
+                {rows.map((p: any) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-mono text-xs">{p.payment_no}</TableCell>
                     <TableCell>{p.paid_at}</TableCell>
