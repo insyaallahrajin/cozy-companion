@@ -117,6 +117,8 @@ function NewPaymentDialog({ schoolId }: { schoolId: string }) {
   const [method, setMethod] = useState<"TUNAI"|"TRANSFER"|"QRIS"|"VA"|"LAINNYA">("TUNAI");
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
   const [reference, setReference] = useState("");
+  // stable client_request_id per dialog-open + re-arm on success — guarantees idempotency
+  const requestIdRef = useRef<string>(crypto.randomUUID());
 
   const record = useServerFn(recordPayment);
   const m = useMutation({
@@ -128,13 +130,15 @@ function NewPaymentDialog({ schoolId }: { schoolId: string }) {
         student_id: inv?.student_id ?? null,
         cash_account_id: accountId,
         amount, method, reference: reference || null, paid_at: paidAt,
+        client_request_id: requestIdRef.current,
       }});
     },
-    onSuccess: () => {
-      toast.success("Pembayaran tercatat");
+    onSuccess: (res: any) => {
+      toast.success(res?.duplicate ? "Pembayaran sudah tercatat sebelumnya (idempotent)" : "Pembayaran tercatat");
       qc.invalidateQueries({ queryKey: ["payments"] });
       qc.invalidateQueries({ queryKey: ["invoices"] });
       qc.invalidateQueries({ queryKey: ["cash-accounts"] });
+      requestIdRef.current = crypto.randomUUID();
       setOpen(false); setInvoiceId(""); setAmount(0); setReference("");
     },
     onError: (e: any) => toast.error(e.message),
