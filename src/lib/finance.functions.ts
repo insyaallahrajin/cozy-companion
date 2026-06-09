@@ -315,10 +315,21 @@ export const recordPayment = createServerFn({ method: "POST" })
     reference: z.string().max(120).optional().nullable(),
     paid_at: z.string(),
     notes: z.string().max(500).optional().nullable(),
+    client_request_id: z.string().min(8).max(80).optional().nullable(),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
-    // load cash account name
+
+    // IDEMPOTENCY: short-circuit if this client_request_id was already processed
+    if (data.client_request_id) {
+      const { data: dup } = await sb.from("payments")
+        .select("id, payment_no")
+        .eq("school_id", data.school_id)
+        .eq("client_request_id", data.client_request_id)
+        .maybeSingle();
+      if (dup) return { ok: true, id: dup.id, payment_no: dup.payment_no, duplicate: true };
+    }
+
     const { data: acc, error: ae } = await sb.from("cash_accounts")
       .select("name, type").eq("id", data.cash_account_id).single();
     if (ae || !acc) throw new Error("Akun kas tidak ditemukan");
@@ -326,7 +337,6 @@ export const recordPayment = createServerFn({ method: "POST" })
     const payment_no = await nextSeq(sb, "payments", data.school_id, "payment_no", "PAY-");
     const entry_no = await nextSeq(sb, "journal_entries", data.school_id, "entry_no", "JRN-");
 
-    // create journal: Dr Kas/Bank, Cr Pendapatan SPP
     const { data: je, error: jee } = await sb.from("journal_entries").insert({
       school_id: data.school_id,
       entry_no, entry_date: data.paid_at,
@@ -336,10 +346,11 @@ export const recordPayment = createServerFn({ method: "POST" })
     if (jee) throw new Error(jee.message);
     const accCode = acc.type === "BANK" ? "1-1200" : "1-1100";
     const accName = acc.type === "BANK" ? `Bank — ${acc.name}` : `Kas — ${acc.name}`;
-    await sb.from("journal_lines").insert([
+    const { error: jle } = await sb.from("journal_lines").insert([
       { journal_entry_id: je!.id, account_code: accCode, account_name: accName, debit: data.amount, credit: 0 },
       { journal_entry_id: je!.id, account_code: "4-1100", account_name: "Pendapatan SPP", debit: 0, credit: data.amount },
     ]);
+    if (jle) { await sb.from("journal_entries").delete().eq("id", je!.id); throw new Error(jle.message); }
 
     const { data: pay, error: pe } = await sb.from("payments").insert({
       school_id: data.school_id,
@@ -350,10 +361,22 @@ export const recordPayment = createServerFn({ method: "POST" })
       method: data.method, reference: data.reference ?? null,
       paid_at: data.paid_at, notes: data.notes ?? null,
       journal_entry_id: je!.id,
-    }).select("id").single();
-    if (pe) throw new Error(pe.message);
+      client_request_id: data.client_request_id ?? null,
+    }).select("id, payment_no").single();
+    if (pe) {
+      await sb.from("journal_lines").delete().eq("journal_entry_id", je!.id);
+      await sb.from("journal_entries").delete().eq("id", je!.id);
+      // race: another concurrent request with the same client_request_id won the unique index
+      if (data.client_request_id) {
+        const { data: dup } = await sb.from("payments")
+          .select("id, payment_no").eq("school_id", data.school_id)
+          .eq("client_request_id", data.client_request_id).maybeSingle();
+        if (dup) return { ok: true, id: dup.id, payment_no: dup.payment_no, duplicate: true };
+      }
+      throw new Error(pe.message);
+    }
 
-    await sb.from("cash_transactions").insert({
+    const { error: cte } = await sb.from("cash_transactions").insert({
       school_id: data.school_id,
       cash_account_id: data.cash_account_id,
       kind: "IN", amount: data.amount,
@@ -363,6 +386,12 @@ export const recordPayment = createServerFn({ method: "POST" })
       payment_id: pay!.id,
       journal_entry_id: je!.id,
     });
+    if (cte && !/duplicate key/i.test(cte.message)) {
+      await sb.from("payments").delete().eq("id", pay!.id);
+      await sb.from("journal_lines").delete().eq("journal_entry_id", je!.id);
+      await sb.from("journal_entries").delete().eq("id", je!.id);
+      throw new Error(cte.message);
+    }
 
     if (data.invoice_id) {
       const { data: inv } = await sb.from("invoices").select("total_amount, paid_amount")
@@ -375,7 +404,7 @@ export const recordPayment = createServerFn({ method: "POST" })
           .eq("id", data.invoice_id);
       }
     }
-    return { ok: true, id: pay!.id, payment_no };
+    return { ok: true, id: pay!.id, payment_no: pay!.payment_no, duplicate: false };
   });
 
 // ============ CASH TRANSACTIONS (manual) ============
@@ -564,5 +593,153 @@ export const getDashboardStats = createServerFn({ method: "POST" })
       outstanding,
       cashBalance,
       activeYearId: ay.data?.id ?? null,
+    };
+  });
+
+// ============ PERIOD CHECK (dry-run + reconciliation) ============
+export const previewGenerateInvoices = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    school_id: uuid,
+    fee_plan_id: uuid,
+    period_label: z.string().min(1).max(32),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase;
+    const { data: plan, error: pe } = await sb
+      .from("fee_plans").select("*, fee_plan_items(amount, fee_categories(name))")
+      .eq("id", data.fee_plan_id).single();
+    if (pe || !plan) throw new Error("Paket tidak ditemukan");
+
+    let cq = sb.from("classes").select("id, grade_level, name")
+      .eq("school_id", data.school_id).eq("academic_year_id", plan.academic_year_id);
+    if (plan.grade_level != null) cq = cq.eq("grade_level", plan.grade_level);
+    const { data: classes } = await cq;
+    const classIds = (classes ?? []).map((c: any) => c.id);
+
+    let students: any[] = [];
+    if (classIds.length) {
+      const { data: enr } = await sb.from("student_enrollments")
+        .select("student_id, students(full_name, nis)")
+        .in("class_id", classIds).eq("status", "AKTIF");
+      const uniq = new Map<string, any>();
+      (enr ?? []).forEach((e: any) => { if (!uniq.has(e.student_id)) uniq.set(e.student_id, e); });
+      students = Array.from(uniq.values());
+    }
+    const ids = students.map((s) => s.student_id);
+    let already = new Set<string>();
+    if (ids.length) {
+      const { data: ex } = await sb.from("invoices")
+        .select("student_id").eq("school_id", data.school_id)
+        .eq("period_label", data.period_label).in("student_id", ids);
+      already = new Set((ex ?? []).map((e: any) => e.student_id));
+    }
+    const items = (plan as any).fee_plan_items as any[];
+    const perStudent = items.reduce((s, i) => s + Number(i.amount), 0);
+
+    const willCreate = students.filter((s) => !already.has(s.student_id));
+    const willSkip = students.filter((s) => already.has(s.student_id));
+
+    return {
+      planName: plan.name,
+      classesMatched: classes?.length ?? 0,
+      perStudentAmount: perStudent,
+      totalStudents: students.length,
+      willCreateCount: willCreate.length,
+      willSkipCount: willSkip.length,
+      projectedAmount: willCreate.length * perStudent,
+      items: items.map((i: any) => ({ name: i.fee_categories?.name ?? "Item", amount: Number(i.amount) })),
+      sample: willCreate.slice(0, 10).map((s: any) => ({
+        student_id: s.student_id,
+        full_name: s.students?.full_name ?? "—",
+        nis: s.students?.nis ?? "—",
+      })),
+      skippedSample: willSkip.slice(0, 10).map((s: any) => ({
+        student_id: s.student_id,
+        full_name: s.students?.full_name ?? "—",
+      })),
+    };
+  });
+
+export const reconcilePeriod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    school_id: uuid,
+    from: z.string(),
+    to: z.string(),
+    period_label: z.string().optional().nullable(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase;
+    let invQ = sb.from("invoices")
+      .select("id, status, total_amount, paid_amount, period_label, student_id, students(full_name)")
+      .eq("school_id", data.school_id).gte("issue_date", data.from).lte("issue_date", data.to);
+    if (data.period_label) invQ = invQ.eq("period_label", data.period_label);
+    const [{ data: invs }, { data: pays }, { data: jes }] = await Promise.all([
+      invQ,
+      sb.from("payments")
+        .select("id, amount, journal_entry_id, invoice_id, payment_no, client_request_id, paid_at")
+        .eq("school_id", data.school_id).gte("paid_at", data.from).lte("paid_at", data.to),
+      sb.from("journal_entries")
+        .select("id, entry_no, entry_date, source, journal_lines(debit, credit)")
+        .eq("school_id", data.school_id).gte("entry_date", data.from).lte("entry_date", data.to),
+    ]);
+
+    const invoices = invs ?? [];
+    const payments = pays ?? [];
+    const journals = jes ?? [];
+
+    // duplicate invoice (same student + period, non-cancelled)
+    const invKey = new Map<string, number>();
+    invoices.forEach((i: any) => {
+      if (i.status === "CANCELLED" || !i.period_label) return;
+      const k = `${i.student_id}|${i.period_label}`;
+      invKey.set(k, (invKey.get(k) ?? 0) + 1);
+    });
+    const duplicateInvoices = Array.from(invKey.entries()).filter(([, n]) => n > 1)
+      .map(([k, n]) => ({ key: k, count: n }));
+
+    // payments without journal
+    const orphanPayments = payments.filter((p: any) => !p.journal_entry_id)
+      .map((p: any) => ({ id: p.id, payment_no: p.payment_no, amount: Number(p.amount) }));
+
+    // unbalanced journals
+    const unbalancedJournals = journals.map((j: any) => {
+      const d = (j.journal_lines ?? []).reduce((s: number, l: any) => s + Number(l.debit), 0);
+      const c = (j.journal_lines ?? []).reduce((s: number, l: any) => s + Number(l.credit), 0);
+      return { entry_no: j.entry_no, entry_date: j.entry_date, debit: d, credit: c, diff: d - c };
+    }).filter((j) => Math.abs(j.diff) > 0.001);
+
+    // invoices with paid > total
+    const overPaid = invoices.filter((i: any) => Number(i.paid_amount) > Number(i.total_amount) + 0.001)
+      .map((i: any) => ({ id: i.id, student: i.students?.full_name, total: Number(i.total_amount), paid: Number(i.paid_amount) }));
+
+    // sum check: sum(payments) vs sum(invoice.paid in period)
+    const sumPayments = payments.reduce((s: number, p: any) => s + Number(p.amount), 0);
+    const sumInvoicePaid = invoices.reduce((s: number, i: any) => s + Number(i.paid_amount), 0);
+
+    return {
+      counts: {
+        invoices: invoices.length,
+        payments: payments.length,
+        journals: journals.length,
+      },
+      totals: {
+        invoiced: invoices.reduce((s: number, i: any) => s + Number(i.total_amount), 0),
+        paidOnInvoices: sumInvoicePaid,
+        outstanding: invoices.filter((i: any) => i.status !== "CANCELLED")
+          .reduce((s: number, i: any) => s + (Number(i.total_amount) - Number(i.paid_amount)), 0),
+        sumPayments,
+      },
+      issues: {
+        duplicateInvoices,
+        orphanPayments,
+        unbalancedJournals,
+        overPaid,
+      },
+      ok: duplicateInvoices.length === 0
+        && orphanPayments.length === 0
+        && unbalancedJournals.length === 0
+        && overPaid.length === 0,
     };
   });

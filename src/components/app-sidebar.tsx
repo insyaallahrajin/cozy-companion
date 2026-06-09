@@ -59,6 +59,7 @@ const groups: { label: string; items: Item[] }[] = [
       { title: "Kas & Bank", url: "/keuangan/kas-bank", icon: Landmark },
       { title: "COA & Jurnal", url: "/akuntansi/jurnal", icon: FileBarChart },
       { title: "Laporan Keuangan", url: "/akuntansi/laporan", icon: FileBarChart },
+      { title: "Cek Periode", url: "/keuangan/cek-periode", icon: ShieldCheck },
     ],
   },
   {

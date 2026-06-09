@@ -906,6 +906,7 @@ export type Database = {
         Row: {
           amount: number
           cash_account_id: string
+          client_request_id: string | null
           created_at: string
           id: string
           invoice_id: string | null
@@ -922,6 +923,7 @@ export type Database = {
         Insert: {
           amount: number
           cash_account_id: string
+          client_request_id?: string | null
           created_at?: string
           id?: string
           invoice_id?: string | null
@@ -938,6 +940,7 @@ export type Database = {
         Update: {
           amount?: number
           cash_account_id?: string
+          client_request_id?: string | null
           created_at?: string
           id?: string
           invoice_id?: string | null
@@ -1598,6 +1601,10 @@ export type Database = {
       }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       user_can_access_school: {
+        Args: { _school_id: string; _uid: string }
+        Returns: boolean
+      }
+      user_can_manage_finance: {
         Args: { _school_id: string; _uid: string }
         Returns: boolean
       }

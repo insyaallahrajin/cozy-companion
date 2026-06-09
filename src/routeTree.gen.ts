@@ -21,6 +21,7 @@ import { Route as AuthenticatedSistemAuditRouteImport } from './routes/_authenti
 import { Route as AuthenticatedKeuanganTagihanRouteImport } from './routes/_authenticated/keuangan/tagihan'
 import { Route as AuthenticatedKeuanganPembayaranRouteImport } from './routes/_authenticated/keuangan/pembayaran'
 import { Route as AuthenticatedKeuanganKasBankRouteImport } from './routes/_authenticated/keuangan/kas-bank'
+import { Route as AuthenticatedKeuanganCekPeriodeRouteImport } from './routes/_authenticated/keuangan/cek-periode'
 import { Route as AuthenticatedAkuntansiLaporanRouteImport } from './routes/_authenticated/akuntansi/laporan'
 import { Route as AuthenticatedAkuntansiJurnalRouteImport } from './routes/_authenticated/akuntansi/jurnal'
 import { Route as AuthenticatedAkademikTahunAjaranRouteImport } from './routes/_authenticated/akademik/tahun-ajaran'
@@ -98,6 +99,12 @@ const AuthenticatedKeuanganKasBankRoute =
   AuthenticatedKeuanganKasBankRouteImport.update({
     id: '/keuangan/kas-bank',
     path: '/keuangan/kas-bank',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedKeuanganCekPeriodeRoute =
+  AuthenticatedKeuanganCekPeriodeRouteImport.update({
+    id: '/keuangan/cek-periode',
+    path: '/keuangan/cek-periode',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAkuntansiLaporanRoute =
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/akuntansi/jurnal': typeof AuthenticatedAkuntansiJurnalRoute
   '/akuntansi/laporan': typeof AuthenticatedAkuntansiLaporanRoute
+  '/keuangan/cek-periode': typeof AuthenticatedKeuanganCekPeriodeRoute
   '/keuangan/kas-bank': typeof AuthenticatedKeuanganKasBankRoute
   '/keuangan/pembayaran': typeof AuthenticatedKeuanganPembayaranRoute
   '/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
@@ -215,6 +223,7 @@ export interface FileRoutesByTo {
   '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/akuntansi/jurnal': typeof AuthenticatedAkuntansiJurnalRoute
   '/akuntansi/laporan': typeof AuthenticatedAkuntansiLaporanRoute
+  '/keuangan/cek-periode': typeof AuthenticatedKeuanganCekPeriodeRoute
   '/keuangan/kas-bank': typeof AuthenticatedKeuanganKasBankRoute
   '/keuangan/pembayaran': typeof AuthenticatedKeuanganPembayaranRoute
   '/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
@@ -242,6 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
   '/_authenticated/akuntansi/jurnal': typeof AuthenticatedAkuntansiJurnalRoute
   '/_authenticated/akuntansi/laporan': typeof AuthenticatedAkuntansiLaporanRoute
+  '/_authenticated/keuangan/cek-periode': typeof AuthenticatedKeuanganCekPeriodeRoute
   '/_authenticated/keuangan/kas-bank': typeof AuthenticatedKeuanganKasBankRoute
   '/_authenticated/keuangan/pembayaran': typeof AuthenticatedKeuanganPembayaranRoute
   '/_authenticated/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/akademik/tahun-ajaran'
     | '/akuntansi/jurnal'
     | '/akuntansi/laporan'
+    | '/keuangan/cek-periode'
     | '/keuangan/kas-bank'
     | '/keuangan/pembayaran'
     | '/keuangan/tagihan'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/akademik/tahun-ajaran'
     | '/akuntansi/jurnal'
     | '/akuntansi/laporan'
+    | '/keuangan/cek-periode'
     | '/keuangan/kas-bank'
     | '/keuangan/pembayaran'
     | '/keuangan/tagihan'
@@ -320,6 +332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/akademik/tahun-ajaran'
     | '/_authenticated/akuntansi/jurnal'
     | '/_authenticated/akuntansi/laporan'
+    | '/_authenticated/keuangan/cek-periode'
     | '/_authenticated/keuangan/kas-bank'
     | '/_authenticated/keuangan/pembayaran'
     | '/_authenticated/keuangan/tagihan'
@@ -419,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: '/keuangan/kas-bank'
       fullPath: '/keuangan/kas-bank'
       preLoaderRoute: typeof AuthenticatedKeuanganKasBankRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/keuangan/cek-periode': {
+      id: '/_authenticated/keuangan/cek-periode'
+      path: '/keuangan/cek-periode'
+      fullPath: '/keuangan/cek-periode'
+      preLoaderRoute: typeof AuthenticatedKeuanganCekPeriodeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/akuntansi/laporan': {
@@ -523,6 +543,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAkademikTahunAjaranRoute: typeof AuthenticatedAkademikTahunAjaranRoute
   AuthenticatedAkuntansiJurnalRoute: typeof AuthenticatedAkuntansiJurnalRoute
   AuthenticatedAkuntansiLaporanRoute: typeof AuthenticatedAkuntansiLaporanRoute
+  AuthenticatedKeuanganCekPeriodeRoute: typeof AuthenticatedKeuanganCekPeriodeRoute
   AuthenticatedKeuanganKasBankRoute: typeof AuthenticatedKeuanganKasBankRoute
   AuthenticatedKeuanganPembayaranRoute: typeof AuthenticatedKeuanganPembayaranRoute
   AuthenticatedKeuanganTagihanRoute: typeof AuthenticatedKeuanganTagihanRoute
@@ -548,6 +569,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAkademikTahunAjaranRoute: AuthenticatedAkademikTahunAjaranRoute,
   AuthenticatedAkuntansiJurnalRoute: AuthenticatedAkuntansiJurnalRoute,
   AuthenticatedAkuntansiLaporanRoute: AuthenticatedAkuntansiLaporanRoute,
+  AuthenticatedKeuanganCekPeriodeRoute: AuthenticatedKeuanganCekPeriodeRoute,
   AuthenticatedKeuanganKasBankRoute: AuthenticatedKeuanganKasBankRoute,
   AuthenticatedKeuanganPembayaranRoute: AuthenticatedKeuanganPembayaranRoute,
   AuthenticatedKeuanganTagihanRoute: AuthenticatedKeuanganTagihanRoute,
@@ -568,13 +590,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

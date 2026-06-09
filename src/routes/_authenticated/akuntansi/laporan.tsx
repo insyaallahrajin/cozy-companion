@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Printer } from "lucide-react";
+import { Loader2, Printer, Download } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
+import { downloadCsv } from "@/lib/csv";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/akuntansi/laporan")({
   head: () => ({ meta: [{ title: "Laporan Keuangan — SIMAT" }] }),
@@ -23,12 +25,41 @@ function Page({ schoolId }: { schoolId: string }) {
   const fetch = useServerFn(getFinanceReport);
   const q = useQuery({ queryKey: ["fin-report", schoolId, from, to], queryFn: () => fetch({ data: { school_id: schoolId, from, to } }) });
   const r = q.data;
+  const exportCsv = () => {
+    if (!r) { toast.info("Belum ada data."); return; }
+    const summaryRows = [
+      { label: "Total Tagihan", value: r.summary.totalInvoiced },
+      { label: "Telah Dibayar", value: r.summary.totalPaidInvoices },
+      { label: "Tunggakan", value: r.summary.outstanding },
+      { label: "Penerimaan Tunai", value: r.summary.totalPayments },
+      { label: "Kas Masuk", value: r.summary.cashIn },
+      { label: "Kas Keluar", value: r.summary.cashOut },
+      { label: "Arus Bersih", value: r.summary.net },
+    ];
+    downloadCsv(`laporan_keuangan_${from}_${to}.csv`,
+      [
+        ...summaryRows.map((s) => ({ kind: "RINGKASAN", code: "", name: s.label, debit: "", credit: "", saldo: s.value })),
+        ...r.ledger.map((l) => ({ kind: "BUKU_BESAR", code: l.code, name: l.name, debit: l.debit, credit: l.credit, saldo: l.debit - l.credit })),
+      ],
+      [
+        { header: "Bagian", value: (x) => x.kind },
+        { header: "Kode", value: (x) => x.code },
+        { header: "Akun / Pos", value: (x) => x.name },
+        { header: "Debit", value: (x) => x.debit },
+        { header: "Kredit", value: (x) => x.credit },
+        { header: "Saldo / Nilai", value: (x) => x.saldo },
+      ],
+    );
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between print:hidden">
         <div><h1 className="text-3xl font-bold tracking-tight">Laporan Keuangan</h1>
           <p className="text-muted-foreground">Ringkasan tagihan, pembayaran, kas, dan jurnal pada periode.</p></div>
-        <Button onClick={() => window.print()} variant="outline"><Printer className="h-4 w-4 mr-2" />Cetak</Button>
+        <div className="flex gap-2">
+          <Button onClick={exportCsv} variant="outline"><Download className="h-4 w-4 mr-2" />Ekspor CSV</Button>
+          <Button onClick={() => window.print()} variant="outline"><Printer className="h-4 w-4 mr-2" />Cetak</Button>
+        </div>
       </div>
       <Card className="print:hidden">
         <CardContent className="pt-6 flex items-end gap-2 flex-wrap">
