@@ -558,7 +558,7 @@ export const getDashboardStats = createServerFn({ method: "POST" })
     return {
       studentsCount: students.count ?? 0,
       staffCount: staff.count ?? 0,
-      classesCount: classes.count ?? 0,
+      classesCount: classesCount.count ?? 0,
       attendanceRate,
       attendanceRecorded: attRows.length,
       outstanding,
