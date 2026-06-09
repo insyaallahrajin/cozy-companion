@@ -70,8 +70,16 @@ const groups: { label: string; items: Item[] }[] = [
     ],
   },
   {
+    label: "Akademik (lanjutan)",
+    items: [
+      { title: "Tahun Ajaran", url: "/akademik/tahun-ajaran", icon: CalendarCheck },
+      { title: "Mata Pelajaran", url: "/akademik/mata-pelajaran", icon: BookOpen },
+    ],
+  },
+  {
     label: "Sistem",
     items: [
+      { title: "Setup Awal", url: "/setup", icon: Settings },
       { title: "Sekolah & Yayasan", url: "/sistem/sekolah", icon: Building2 },
       { title: "Pengguna & Peran", url: "/sistem/pengguna", icon: ShieldCheck },
       { title: "Jejak Audit", url: "/sistem/audit", icon: ShieldCheck },
@@ -79,6 +87,7 @@ const groups: { label: string; items: Item[] }[] = [
     ],
   },
 ];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
