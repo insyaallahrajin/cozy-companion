@@ -119,7 +119,7 @@ function SetupWizard() {
           <CardDescription>Membuat Yayasan At-Tauhid + SMP At-Tauhid + Tahun Ajaran 2025/2026 + 9 mapel + 8 guru + 4 kelas + 40 siswa (dengan orang tua) sekaligus.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => seedMut.mutate({})} disabled={seedMut.isPending} variant="default">
+          <Button onClick={() => seedMut.mutate()} disabled={seedMut.isPending} variant="default">
             {seedMut.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Muat Data Demo Sekarang
           </Button>
@@ -168,7 +168,7 @@ function SetupWizard() {
               <div><Label>Nama *</Label><Input value={fName} onChange={(e) => setFName(e.target.value)} placeholder="Yayasan At-Tauhid" /></div>
               <div className="col-span-2"><Label>Kota</Label><Input value={fCity} onChange={(e) => setFCity(e.target.value)} placeholder="Bandung" /></div>
             </div>
-            <Button onClick={() => createFoundation.mutate({})} disabled={!fName || !fCode || createFoundation.isPending}>
+            <Button onClick={() => createFoundation.mutate()} disabled={!fName || !fCode || createFoundation.isPending}>
               {createFoundation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Buat Yayasan & Lanjut
             </Button>
           </CardContent>
@@ -192,7 +192,7 @@ function SetupWizard() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setStep(1)}>Kembali</Button>
-              <Button onClick={() => createSchool.mutate({})} disabled={!sName || !sCode || createSchool.isPending}>
+              <Button onClick={() => createSchool.mutate()} disabled={!sName || !sCode || createSchool.isPending}>
                 {createSchool.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Buat Sekolah & Lanjut
               </Button>
             </div>
@@ -210,7 +210,7 @@ function SetupWizard() {
               <div><Label>Selesai *</Label><Input type="date" value={yEnd} onChange={(e) => setYEnd(e.target.value)} /></div>
             </div>
             <p className="text-xs text-muted-foreground">Dua semester (Ganjil & Genap) akan dibuat otomatis.</p>
-            <Button onClick={() => createYear.mutate({})} disabled={createYear.isPending}>
+            <Button onClick={() => createYear.mutate()} disabled={createYear.isPending}>
               {createYear.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Buat & Selesai
             </Button>
           </CardContent>

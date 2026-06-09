@@ -131,7 +131,7 @@ function GradesPanel({ csId, termId }: { csId: string; termId: string }) {
         <div><Label>Nilai</Label><Input type="number" step="0.01" min={0} max={100} value={score} onChange={(e) => setScore(parseFloat(e.target.value) || 0)} /></div>
         <div className="flex gap-2 items-end">
           <div className="flex-1"><Label>Bobot</Label><Input type="number" step="0.1" value={weight} onChange={(e) => setWeight(parseFloat(e.target.value) || 1)} /></div>
-          <Button onClick={() => add.mutate({})} disabled={!studentId || add.isPending}><Plus className="h-4 w-4" /></Button>
+          <Button onClick={() => add.mutate()} disabled={!studentId || add.isPending}><Plus className="h-4 w-4" /></Button>
         </div>
       </div>
     </CardContent></Card>

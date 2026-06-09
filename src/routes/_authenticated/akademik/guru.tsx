@@ -72,7 +72,7 @@ function Page({ schoolId }: { schoolId: string }) {
 function DelBtn({ id, schoolId }: { id: string; schoolId: string }) {
   const qc = useQueryClient(); const del = useServerFn(deleteStaff);
   const m = useMutation({ mutationFn: () => del({ data: { id } }), onSuccess: () => { toast.success("Dihapus"); qc.invalidateQueries({ queryKey: ["staff", schoolId] }); } });
-  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus?") && m.mutate({})}><Trash2 className="h-4 w-4" /></Button>;
+  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus?") && m.mutate()}><Trash2 className="h-4 w-4" /></Button>;
 }
 
 function StaffDialog({ schoolId, staff }: { schoolId: string; staff?: Staff }) {
@@ -116,7 +116,7 @@ function StaffDialog({ schoolId, staff }: { schoolId: string; staff?: Staff }) {
           </div>
           <div className="flex items-end gap-2"><Switch checked={data.is_teacher} onCheckedChange={(v) => setData({...data, is_teacher: v})} /><Label>Tercatat sebagai guru</Label></div>
         </div>
-        <DialogFooter><Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button><Button onClick={() => m.mutate({})} disabled={!data.full_name || m.isPending}>Simpan</Button></DialogFooter>
+        <DialogFooter><Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button><Button onClick={() => m.mutate()} disabled={!data.full_name || m.isPending}>Simpan</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -90,7 +90,7 @@ function DeleteButton({ id, schoolId }: { id: string; schoolId: string }) {
     onError: (e: Error) => toast.error("Gagal", { description: e.message }),
   });
   return (
-    <Button size="icon" variant="ghost" onClick={() => confirm("Hapus tahun ajaran?") && m.mutate({})}>
+    <Button size="icon" variant="ghost" onClick={() => confirm("Hapus tahun ajaran?") && m.mutate()}>
       <Trash2 className="h-4 w-4" />
     </Button>
   );
@@ -129,7 +129,7 @@ function YearDialog({ schoolId, year }: { schoolId: string; year?: Year }) {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button>
-          <Button onClick={() => m.mutate({})} disabled={!name || !start || !end || m.isPending}>Simpan</Button>
+          <Button onClick={() => m.mutate()} disabled={!name || !start || !end || m.isPending}>Simpan</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -181,7 +181,7 @@ function TermsCard({ yearId }: { yearId: string }) {
           <div><Label>Urutan</Label><Input type="number" value={ord} onChange={(e) => setOrd(parseInt(e.target.value) || 1)} /></div>
           <div><Label>Mulai</Label><Input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></div>
           <div><Label>Selesai</Label><Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
-          <Button onClick={() => add.mutate({})} disabled={!name || !start || !end || add.isPending}>Tambah</Button>
+          <Button onClick={() => add.mutate()} disabled={!name || !start || !end || add.isPending}>Tambah</Button>
         </div>
       </CardContent>
     </Card>

@@ -82,7 +82,7 @@ function Page({ schoolId }: { schoolId: string }) {
 function DelBtn({ id, schoolId }: { id: string; schoolId: string }) {
   const qc = useQueryClient(); const del = useServerFn(deleteStudent);
   const m = useMutation({ mutationFn: () => del({ data: { id } }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["students", schoolId] }); } });
-  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus siswa?") && m.mutate({})}><Trash2 className="h-4 w-4" /></Button>;
+  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus siswa?") && m.mutate()}><Trash2 className="h-4 w-4" /></Button>;
 }
 
 const RELIGIONS = ["ISLAM","KRISTEN","KATOLIK","HINDU","BUDDHA","KONGHUCU","LAINNYA"] as const;
@@ -207,7 +207,7 @@ function EnrollDialog({ schoolId }: { schoolId: string }) {
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button>
-          <Button onClick={() => m.mutate({})} disabled={!s.full_name || m.isPending}>
+          <Button onClick={() => m.mutate()} disabled={!s.full_name || m.isPending}>
             {m.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}Simpan & Daftarkan
           </Button>
         </DialogFooter>

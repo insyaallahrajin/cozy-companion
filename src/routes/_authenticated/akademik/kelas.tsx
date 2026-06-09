@@ -82,7 +82,7 @@ function Page({ schoolId }: { schoolId: string }) {
 function DelBtn({ id, schoolId, yearId }: { id: string; schoolId: string; yearId: string }) {
   const qc = useQueryClient(); const del = useServerFn(deleteClass);
   const m = useMutation({ mutationFn: () => del({ data: { id } }), onSuccess: () => { qc.invalidateQueries({ queryKey: ["classes", schoolId, yearId] }); } });
-  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus kelas?") && m.mutate({})}><Trash2 className="h-4 w-4" /></Button>;
+  return <Button size="icon" variant="ghost" onClick={() => confirm("Hapus kelas?") && m.mutate()}><Trash2 className="h-4 w-4" /></Button>;
 }
 
 function ClassDialog({ schoolId, yearId, klass }: { schoolId: string; yearId: string; klass?: any }) {
@@ -116,7 +116,7 @@ function ClassDialog({ schoolId, yearId, klass }: { schoolId: string; yearId: st
             </Select>
           </div>
         </div>
-        <DialogFooter><Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button><Button onClick={() => m.mutate({})} disabled={!d.name || m.isPending}>Simpan</Button></DialogFooter>
+        <DialogFooter><Button variant="ghost" onClick={() => setOpen(false)}>Batal</Button><Button onClick={() => m.mutate()} disabled={!d.name || m.isPending}>Simpan</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -170,7 +170,7 @@ function ClassSubjectsDialog({ classId, className, schoolId }: { classId: string
           </div>
           <div className="flex gap-2 items-end">
             <div className="flex-1"><Label>Jam</Label><Input type="number" value={hours} onChange={(e) => setHours(parseInt(e.target.value) || 1)} /></div>
-            <Button onClick={() => add.mutate({})} disabled={!subjectId || add.isPending}>+</Button>
+            <Button onClick={() => add.mutate()} disabled={!subjectId || add.isPending}>+</Button>
           </div>
         </div>
       </DialogContent>

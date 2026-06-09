@@ -103,7 +103,7 @@ function SchedulePanel({ classId }: { classId: string }) {
         <div><Label>Selesai</Label><Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
         <div className="flex gap-2 items-end">
           <div className="flex-1"><Label>Ruang</Label><Input value={room} onChange={(e) => setRoom(e.target.value)} /></div>
-          <Button onClick={() => add.mutate({})} disabled={!csId || add.isPending}><Plus className="h-4 w-4" /></Button>
+          <Button onClick={() => add.mutate()} disabled={!csId || add.isPending}><Plus className="h-4 w-4" /></Button>
         </div>
       </div>
     </CardContent></Card>

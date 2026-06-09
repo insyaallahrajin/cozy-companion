@@ -81,7 +81,7 @@ function AttendancePanel({ classId, date }: { classId: string; date: string }) {
   return (
     <Card><CardHeader><div className="flex items-center justify-between">
       <CardTitle>Presensi Kelas — {date}</CardTitle>
-      <Button onClick={() => m.mutate({})} disabled={m.isPending}><Save className="h-4 w-4 mr-1" />Simpan Semua</Button>
+      <Button onClick={() => m.mutate()} disabled={m.isPending}><Save className="h-4 w-4 mr-1" />Simpan Semua</Button>
     </div></CardHeader><CardContent>
       {students.length === 0 ? <p className="text-sm text-muted-foreground">Belum ada siswa terdaftar di kelas ini.</p> : (
         <Table>
