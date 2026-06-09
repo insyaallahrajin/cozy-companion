@@ -18,6 +18,7 @@ import { Route as AuthenticatedSistemSekolahRouteImport } from './routes/_authen
 import { Route as AuthenticatedSistemPenggunaRouteImport } from './routes/_authenticated/sistem/pengguna'
 import { Route as AuthenticatedSistemPengaturanRouteImport } from './routes/_authenticated/sistem/pengaturan'
 import { Route as AuthenticatedSistemAuditRouteImport } from './routes/_authenticated/sistem/audit'
+import { Route as AuthenticatedKeuanganTagihanRouteImport } from './routes/_authenticated/keuangan/tagihan'
 import { Route as AuthenticatedAkademikTahunAjaranRouteImport } from './routes/_authenticated/akademik/tahun-ajaran'
 import { Route as AuthenticatedAkademikSiswaRouteImport } from './routes/_authenticated/akademik/siswa'
 import { Route as AuthenticatedAkademikPresensiRouteImport } from './routes/_authenticated/akademik/presensi'
@@ -75,6 +76,12 @@ const AuthenticatedSistemAuditRoute =
   AuthenticatedSistemAuditRouteImport.update({
     id: '/sistem/audit',
     path: '/sistem/audit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedKeuanganTagihanRoute =
+  AuthenticatedKeuanganTagihanRouteImport.update({
+    id: '/keuangan/tagihan',
+    path: '/keuangan/tagihan',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAkademikTahunAjaranRoute =
@@ -153,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
   '/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
   '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
+  '/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
   '/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -173,6 +181,7 @@ export interface FileRoutesByTo {
   '/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
   '/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
   '/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
+  '/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
   '/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/_authenticated/akademik/presensi': typeof AuthenticatedAkademikPresensiRoute
   '/_authenticated/akademik/siswa': typeof AuthenticatedAkademikSiswaRoute
   '/_authenticated/akademik/tahun-ajaran': typeof AuthenticatedAkademikTahunAjaranRoute
+  '/_authenticated/keuangan/tagihan': typeof AuthenticatedKeuanganTagihanRoute
   '/_authenticated/sistem/audit': typeof AuthenticatedSistemAuditRoute
   '/_authenticated/sistem/pengaturan': typeof AuthenticatedSistemPengaturanRoute
   '/_authenticated/sistem/pengguna': typeof AuthenticatedSistemPenggunaRoute
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/akademik/presensi'
     | '/akademik/siswa'
     | '/akademik/tahun-ajaran'
+    | '/keuangan/tagihan'
     | '/sistem/audit'
     | '/sistem/pengaturan'
     | '/sistem/pengguna'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/akademik/presensi'
     | '/akademik/siswa'
     | '/akademik/tahun-ajaran'
+    | '/keuangan/tagihan'
     | '/sistem/audit'
     | '/sistem/pengaturan'
     | '/sistem/pengguna'
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/akademik/presensi'
     | '/_authenticated/akademik/siswa'
     | '/_authenticated/akademik/tahun-ajaran'
+    | '/_authenticated/keuangan/tagihan'
     | '/_authenticated/sistem/audit'
     | '/_authenticated/sistem/pengaturan'
     | '/_authenticated/sistem/pengguna'
@@ -333,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/sistem/audit'
       fullPath: '/sistem/audit'
       preLoaderRoute: typeof AuthenticatedSistemAuditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/keuangan/tagihan': {
+      id: '/_authenticated/keuangan/tagihan'
+      path: '/keuangan/tagihan'
+      fullPath: '/keuangan/tagihan'
+      preLoaderRoute: typeof AuthenticatedKeuanganTagihanRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/akademik/tahun-ajaran': {
@@ -421,6 +441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAkademikPresensiRoute: typeof AuthenticatedAkademikPresensiRoute
   AuthenticatedAkademikSiswaRoute: typeof AuthenticatedAkademikSiswaRoute
   AuthenticatedAkademikTahunAjaranRoute: typeof AuthenticatedAkademikTahunAjaranRoute
+  AuthenticatedKeuanganTagihanRoute: typeof AuthenticatedKeuanganTagihanRoute
   AuthenticatedSistemAuditRoute: typeof AuthenticatedSistemAuditRoute
   AuthenticatedSistemPengaturanRoute: typeof AuthenticatedSistemPengaturanRoute
   AuthenticatedSistemPenggunaRoute: typeof AuthenticatedSistemPenggunaRoute
@@ -441,6 +462,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAkademikPresensiRoute: AuthenticatedAkademikPresensiRoute,
   AuthenticatedAkademikSiswaRoute: AuthenticatedAkademikSiswaRoute,
   AuthenticatedAkademikTahunAjaranRoute: AuthenticatedAkademikTahunAjaranRoute,
+  AuthenticatedKeuanganTagihanRoute: AuthenticatedKeuanganTagihanRoute,
   AuthenticatedSistemAuditRoute: AuthenticatedSistemAuditRoute,
   AuthenticatedSistemPengaturanRoute: AuthenticatedSistemPengaturanRoute,
   AuthenticatedSistemPenggunaRoute: AuthenticatedSistemPenggunaRoute,
@@ -458,3 +480,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
