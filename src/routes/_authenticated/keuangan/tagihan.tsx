@@ -19,9 +19,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Loader2, Wand2, X } from "lucide-react";
+import { Plus, Trash2, Loader2, Wand2, X, Download } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/format";
+import { downloadCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/_authenticated/keuangan/tagihan")({
   head: () => ({ meta: [{ title: "Tagihan SPP — SIMAT" }] }),
@@ -52,18 +53,60 @@ function Page({ schoolId }: { schoolId: string }) {
 function InvoicesTab({ schoolId }: { schoolId: string }) {
   const qc = useQueryClient();
   const fetch = useServerFn(listInvoices);
-  const q = useQuery({ queryKey: ["invoices", schoolId], queryFn: () => fetch({ data: { school_id: schoolId } }) });
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+  const [from, setFrom] = useState(monthStart);
+  const [to, setTo] = useState(today.toISOString().slice(0, 10));
+  const [status, setStatus] = useState<string>("ALL");
+  const q = useQuery({
+    queryKey: ["invoices", schoolId, from, to, status],
+    queryFn: () => fetch({ data: {
+      school_id: schoolId, from, to,
+      status: status === "ALL" ? undefined : status as any,
+    }}),
+  });
   const cancel = useServerFn(cancelInvoice);
   const mCancel = useMutation({ mutationFn: (id: string) => cancel({ data: { id } }),
     onSuccess: () => { toast.success("Tagihan dibatalkan"); qc.invalidateQueries({ queryKey: ["invoices"] }); }});
+
+  const rows = q.data ?? [];
+  const exportCsv = () => {
+    if (!rows.length) { toast.info("Tidak ada data untuk diekspor."); return; }
+    downloadCsv(`tagihan_${from}_${to}.csv`, rows as any[], [
+      { header: "No. Tagihan", value: (r) => r.invoice_no },
+      { header: "Siswa", value: (r) => r.students?.full_name ?? "" },
+      { header: "NIS", value: (r) => r.students?.nis ?? "" },
+      { header: "Periode", value: (r) => r.period_label ?? "" },
+      { header: "Tgl Terbit", value: (r) => r.issue_date ?? "" },
+      { header: "Jatuh Tempo", value: (r) => r.due_date },
+      { header: "Total", value: (r) => Number(r.total_amount) },
+      { header: "Dibayar", value: (r) => Number(r.paid_amount) },
+      { header: "Sisa", value: (r) => Number(r.total_amount) - Number(r.paid_amount) },
+      { header: "Status", value: (r) => r.status },
+    ]);
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <CardTitle>Daftar Tagihan</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2" />Ekspor CSV</Button>
             <GenerateDialog schoolId={schoolId} />
             <NewInvoiceDialog schoolId={schoolId} />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-end gap-2 mt-3">
+          <div><Label className="text-xs">Dari</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-40" /></div>
+          <div><Label className="text-xs">Sampai</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" /></div>
+          <div><Label className="text-xs">Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {["ALL","UNPAID","PARTIAL","PAID","CANCELLED"].map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardHeader>
@@ -78,8 +121,8 @@ function InvoicesTab({ schoolId }: { schoolId: string }) {
               <TableHead>Status</TableHead><TableHead className="w-[60px]" />
             </TableRow></TableHeader>
             <TableBody>
-              {(q.data ?? []).length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Belum ada tagihan.</TableCell></TableRow>}
-              {(q.data ?? []).map((i: any) => (
+              {rows.length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Belum ada tagihan.</TableCell></TableRow>}
+              {rows.map((i: any) => (
                 <TableRow key={i.id}>
                   <TableCell className="font-mono text-xs">{i.invoice_no}</TableCell>
                   <TableCell>{i.students?.full_name ?? "—"}</TableCell>
