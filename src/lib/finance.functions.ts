@@ -518,7 +518,7 @@ export const getDashboardStats = createServerFn({ method: "POST" })
     const sb = context.supabase;
     const today = new Date().toISOString().slice(0, 10);
 
-    const [students, staff, classes, ay, attToday, invs, accs] = await Promise.all([
+    const [students, staff, classesCount, ay, classRows, invs, accs] = await Promise.all([
       sb.from("students").select("id", { count: "exact", head: true })
         .eq("school_id", data.school_id).eq("status", "AKTIF"),
       sb.from("staff").select("id", { count: "exact", head: true })
@@ -531,7 +531,13 @@ export const getDashboardStats = createServerFn({ method: "POST" })
       sb.from("cash_accounts").select("id, opening_balance").eq("school_id", data.school_id),
     ]);
 
-    const attRows = attToday.data ?? [];
+    const classIds = (classRows.data ?? []).map((c: any) => c.id);
+    let attRows: any[] = [];
+    if (classIds.length) {
+      const { data: ar } = await sb.from("attendance").select("status")
+        .in("class_id", classIds).eq("attendance_date", today);
+      attRows = ar ?? [];
+    }
     const present = attRows.filter((a: any) => a.status === "HADIR" || a.status === "TERLAMBAT").length;
     const attendanceRate = attRows.length > 0 ? (present / attRows.length) * 100 : null;
 
