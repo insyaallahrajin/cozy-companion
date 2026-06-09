@@ -47,6 +47,8 @@ const groups: { label: string; items: Item[] }[] = [
       { title: "Jadwal Pelajaran", url: "/akademik/jadwal", icon: CalendarCheck },
       { title: "Presensi", url: "/akademik/presensi", icon: ClipboardList },
       { title: "Nilai & Rapor", url: "/akademik/nilai", icon: FileBarChart },
+      { title: "Cetak Rekap Nilai", url: "/akademik/cetak-nilai", icon: FileBarChart },
+      { title: "Impor Data (CSV)", url: "/akademik/impor", icon: Boxes },
     ],
   },
   {

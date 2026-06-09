@@ -25,7 +25,9 @@ import { Route as AuthenticatedAkademikNilaiRouteImport } from './routes/_authen
 import { Route as AuthenticatedAkademikMataPelajaranRouteImport } from './routes/_authenticated/akademik/mata-pelajaran'
 import { Route as AuthenticatedAkademikKelasRouteImport } from './routes/_authenticated/akademik/kelas'
 import { Route as AuthenticatedAkademikJadwalRouteImport } from './routes/_authenticated/akademik/jadwal'
+import { Route as AuthenticatedAkademikImporRouteImport } from './routes/_authenticated/akademik/impor'
 import { Route as AuthenticatedAkademikGuruRouteImport } from './routes/_authenticated/akademik/guru'
+import { Route as AuthenticatedAkademikCetakNilaiRouteImport } from './routes/_authenticated/akademik/cetak-nilai'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -117,10 +119,22 @@ const AuthenticatedAkademikJadwalRoute =
     path: '/akademik/jadwal',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAkademikImporRoute =
+  AuthenticatedAkademikImporRouteImport.update({
+    id: '/akademik/impor',
+    path: '/akademik/impor',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAkademikGuruRoute =
   AuthenticatedAkademikGuruRouteImport.update({
     id: '/akademik/guru',
     path: '/akademik/guru',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAkademikCetakNilaiRoute =
+  AuthenticatedAkademikCetakNilaiRouteImport.update({
+    id: '/akademik/cetak-nilai',
+    path: '/akademik/cetak-nilai',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -129,7 +143,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/akademik/cetak-nilai': typeof AuthenticatedAkademikCetakNilaiRoute
   '/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/akademik/impor': typeof AuthenticatedAkademikImporRoute
   '/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
   '/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
   '/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
@@ -147,7 +163,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/akademik/cetak-nilai': typeof AuthenticatedAkademikCetakNilaiRoute
   '/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/akademik/impor': typeof AuthenticatedAkademikImporRoute
   '/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
   '/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
   '/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
@@ -167,7 +185,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
+  '/_authenticated/akademik/cetak-nilai': typeof AuthenticatedAkademikCetakNilaiRoute
   '/_authenticated/akademik/guru': typeof AuthenticatedAkademikGuruRoute
+  '/_authenticated/akademik/impor': typeof AuthenticatedAkademikImporRoute
   '/_authenticated/akademik/jadwal': typeof AuthenticatedAkademikJadwalRoute
   '/_authenticated/akademik/kelas': typeof AuthenticatedAkademikKelasRoute
   '/_authenticated/akademik/mata-pelajaran': typeof AuthenticatedAkademikMataPelajaranRoute
@@ -187,7 +207,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/setup'
+    | '/akademik/cetak-nilai'
     | '/akademik/guru'
+    | '/akademik/impor'
     | '/akademik/jadwal'
     | '/akademik/kelas'
     | '/akademik/mata-pelajaran'
@@ -205,7 +227,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/setup'
+    | '/akademik/cetak-nilai'
     | '/akademik/guru'
+    | '/akademik/impor'
     | '/akademik/jadwal'
     | '/akademik/kelas'
     | '/akademik/mata-pelajaran'
@@ -224,7 +248,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/setup'
+    | '/_authenticated/akademik/cetak-nilai'
     | '/_authenticated/akademik/guru'
+    | '/_authenticated/akademik/impor'
     | '/_authenticated/akademik/jadwal'
     | '/_authenticated/akademik/kelas'
     | '/_authenticated/akademik/mata-pelajaran'
@@ -358,11 +384,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAkademikJadwalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/akademik/impor': {
+      id: '/_authenticated/akademik/impor'
+      path: '/akademik/impor'
+      fullPath: '/akademik/impor'
+      preLoaderRoute: typeof AuthenticatedAkademikImporRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/akademik/guru': {
       id: '/_authenticated/akademik/guru'
       path: '/akademik/guru'
       fullPath: '/akademik/guru'
       preLoaderRoute: typeof AuthenticatedAkademikGuruRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/akademik/cetak-nilai': {
+      id: '/_authenticated/akademik/cetak-nilai'
+      path: '/akademik/cetak-nilai'
+      fullPath: '/akademik/cetak-nilai'
+      preLoaderRoute: typeof AuthenticatedAkademikCetakNilaiRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -371,7 +411,9 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
+  AuthenticatedAkademikCetakNilaiRoute: typeof AuthenticatedAkademikCetakNilaiRoute
   AuthenticatedAkademikGuruRoute: typeof AuthenticatedAkademikGuruRoute
+  AuthenticatedAkademikImporRoute: typeof AuthenticatedAkademikImporRoute
   AuthenticatedAkademikJadwalRoute: typeof AuthenticatedAkademikJadwalRoute
   AuthenticatedAkademikKelasRoute: typeof AuthenticatedAkademikKelasRoute
   AuthenticatedAkademikMataPelajaranRoute: typeof AuthenticatedAkademikMataPelajaranRoute
@@ -388,7 +430,9 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
+  AuthenticatedAkademikCetakNilaiRoute: AuthenticatedAkademikCetakNilaiRoute,
   AuthenticatedAkademikGuruRoute: AuthenticatedAkademikGuruRoute,
+  AuthenticatedAkademikImporRoute: AuthenticatedAkademikImporRoute,
   AuthenticatedAkademikJadwalRoute: AuthenticatedAkademikJadwalRoute,
   AuthenticatedAkademikKelasRoute: AuthenticatedAkademikKelasRoute,
   AuthenticatedAkademikMataPelajaranRoute:
@@ -414,13 +458,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
