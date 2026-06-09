@@ -46,16 +46,21 @@ export const seedDemoData = createServerFn({ method: "POST" })
 
     // 5. Subjects
     const subjects = [
-      { code: "PAI", name: "Pendidikan Agama Islam", subject_group: "AGAMA", kkm: 75 },
-      { code: "PKN", name: "Pendidikan Kewarganegaraan", subject_group: "UMUM", kkm: 70 },
-      { code: "BIN", name: "Bahasa Indonesia", subject_group: "BAHASA", kkm: 72 },
-      { code: "ENG", name: "Bahasa Inggris", subject_group: "BAHASA", kkm: 70 },
-      { code: "MAT", name: "Matematika", subject_group: "MATEMATIKA", kkm: 70 },
-      { code: "IPA", name: "Ilmu Pengetahuan Alam", subject_group: "IPA", kkm: 70 },
-      { code: "IPS", name: "Ilmu Pengetahuan Sosial", subject_group: "IPS", kkm: 70 },
-      { code: "SBK", name: "Seni Budaya", subject_group: "SENI", kkm: 75 },
-      { code: "PJK", name: "Pendidikan Jasmani", subject_group: "OLAHRAGA", kkm: 75 },
+      { code: "PAI", name: "Pendidikan Agama Islam", subject_group: "AGAMA" as const, kkm: 75 },
+      { code: "PKN", name: "Pendidikan Kewarganegaraan", subject_group: "UMUM" as const, kkm: 70 },
+      { code: "BIN", name: "Bahasa Indonesia", subject_group: "BAHASA" as const, kkm: 72 },
+      { code: "ENG", name: "Bahasa Inggris", subject_group: "BAHASA" as const, kkm: 70 },
+      { code: "MAT", name: "Matematika", subject_group: "MATEMATIKA" as const, kkm: 70 },
+      { code: "IPA", name: "Ilmu Pengetahuan Alam", subject_group: "IPA" as const, kkm: 70 },
+      { code: "IPS", name: "Ilmu Pengetahuan Sosial", subject_group: "IPS" as const, kkm: 70 },
+      { code: "SBK", name: "Seni Budaya", subject_group: "SENI" as const, kkm: 75 },
+      { code: "PJK", name: "Pendidikan Jasmani", subject_group: "OLAHRAGA" as const, kkm: 75 },
     ];
+    await supabaseAdmin.from("subjects").upsert(
+      subjects.map((x) => ({ ...x, school_id: s.id })),
+      { onConflict: "school_id,code" },
+    );
+
     await supabaseAdmin.from("subjects").upsert(
       subjects.map((x) => ({ ...x, school_id: s.id })),
       { onConflict: "school_id,code" },
@@ -63,19 +68,20 @@ export const seedDemoData = createServerFn({ method: "POST" })
 
     // 6. Staff (teachers)
     const teachers = [
-      { full_name: "H. Abdul Hakim, M.Pd.", nip: "T001", position: "Kepala Sekolah", is_teacher: true, gender: "L" },
-      { full_name: "Ibu Aminah, S.Pd.", nip: "T002", position: "Guru PAI", is_teacher: true, gender: "P" },
-      { full_name: "Bapak Surya, S.Pd.", nip: "T003", position: "Guru Matematika", is_teacher: true, gender: "L" },
-      { full_name: "Ibu Lestari, S.S.", nip: "T004", position: "Guru Bahasa Indonesia", is_teacher: true, gender: "P" },
-      { full_name: "Bapak Iqbal, M.Sc.", nip: "T005", position: "Guru IPA", is_teacher: true, gender: "L" },
-      { full_name: "Ibu Maya, S.Pd.", nip: "T006", position: "Guru IPS", is_teacher: true, gender: "P" },
-      { full_name: "Bapak Reza, S.Pd.", nip: "T007", position: "Guru Bahasa Inggris", is_teacher: true, gender: "L" },
-      { full_name: "Ibu Dewi, S.Pd.", nip: "T008", position: "Guru PJK / Wali Kelas 7A", is_teacher: true, gender: "P" },
+      { full_name: "H. Abdul Hakim, M.Pd.", nip: "T001", position: "Kepala Sekolah", is_teacher: true, gender: "L" as const },
+      { full_name: "Ibu Aminah, S.Pd.", nip: "T002", position: "Guru PAI", is_teacher: true, gender: "P" as const },
+      { full_name: "Bapak Surya, S.Pd.", nip: "T003", position: "Guru Matematika", is_teacher: true, gender: "L" as const },
+      { full_name: "Ibu Lestari, S.S.", nip: "T004", position: "Guru Bahasa Indonesia", is_teacher: true, gender: "P" as const },
+      { full_name: "Bapak Iqbal, M.Sc.", nip: "T005", position: "Guru IPA", is_teacher: true, gender: "L" as const },
+      { full_name: "Ibu Maya, S.Pd.", nip: "T006", position: "Guru IPS", is_teacher: true, gender: "P" as const },
+      { full_name: "Bapak Reza, S.Pd.", nip: "T007", position: "Guru Bahasa Inggris", is_teacher: true, gender: "L" as const },
+      { full_name: "Ibu Dewi, S.Pd.", nip: "T008", position: "Guru PJK / Wali Kelas 7A", is_teacher: true, gender: "P" as const },
     ];
     await supabaseAdmin.from("staff").upsert(
-      teachers.map((t) => ({ ...t, school_id: s.id, employment_type: "TETAP_YAYASAN", status: "ACTIVE" })),
+      teachers.map((t) => ({ ...t, school_id: s.id, employment_type: "TETAP_YAYASAN" as const, status: "ACTIVE" as const })),
       { onConflict: "school_id,nip" },
     );
+
     const { data: staffRows } = await supabaseAdmin.from("staff").select("id, full_name, nip").eq("school_id", s.id);
 
     // 7. Classes
@@ -98,7 +104,7 @@ export const seedDemoData = createServerFn({ method: "POST" })
     if (!existing?.length) {
       for (const cls of classRows ?? []) {
         const rows = Array.from({ length: 10 }).map((_, i) => {
-          const g = Math.random() < 0.5 ? "L" : "P";
+          const g: "L" | "P" = Math.random() < 0.5 ? "L" : "P";
           const first = g === "L" ? pick(FIRST_NAMES_M) : pick(FIRST_NAMES_F);
           const last = pick(LAST_NAMES);
           const year = 2010 + (9 - cls.grade_level);
@@ -111,13 +117,13 @@ export const seedDemoData = createServerFn({ method: "POST" })
             full_name: `${first} ${last}`,
             nick_name: first,
             gender: g,
-            religion: "ISLAM",
+            religion: "ISLAM" as const,
             birth_place: "Bandung",
             birth_date: `${year}-${month}-${day}`,
             nisn: `00${year}${cls.grade_level}${seq}`,
             nis: `${cls.name}-${seq}`,
             city: "Bandung", province: "Jawa Barat",
-            status: "AKTIF",
+            status: "AKTIF" as const,
           };
         });
         const { data: inserted, error } = await supabaseAdmin.from("students").insert(rows).select("id");
@@ -126,18 +132,19 @@ export const seedDemoData = createServerFn({ method: "POST" })
         // enroll
         const enr = (inserted ?? []).map((st, idx) => ({
           student_id: st.id, class_id: cls.id, academic_year_id: ay.id,
-          roll_number: idx + 1, status: "AKTIF",
+          roll_number: idx + 1, status: "AKTIF" as const,
         }));
         await supabaseAdmin.from("student_enrollments").insert(enr);
         // parents
         const parents = (inserted ?? []).map((st) => ({
-          student_id: st.id, relation: "AYAH", full_name: `Bapak ${pick(FIRST_NAMES_M)} ${pick(LAST_NAMES)}`,
+          student_id: st.id, relation: "AYAH" as const, full_name: `Bapak ${pick(FIRST_NAMES_M)} ${pick(LAST_NAMES)}`,
           occupation: pick(["Wiraswasta","Karyawan Swasta","PNS","Petani","Guru","Pedagang"]),
           phone: `0812${Math.floor(10000000 + Math.random() * 89999999)}`,
           is_primary: true,
         }));
         await supabaseAdmin.from("student_parents").insert(parents);
       }
+
     }
 
     return { ok: true, foundation_id: f.id, school_id: s.id, academic_year_id: ay.id, students_created: createdStudents };
